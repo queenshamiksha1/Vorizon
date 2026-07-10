@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+    <title>Vorizon — Retro Town Racer</title>
+    <meta name="description" content="Vorizon — a polished 2D retro arcade racing game through a neon town. Drift, dodge traffic, and beat the clock." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="Vorizon — Retro Town Racer" />
+    <meta property="og:description" content="A polished 2D retro arcade racing game through a neon town." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Vorizon — Retro Town Racer" />
+    <meta name="twitter:description" content="A polished 2D retro arcade racing game through a neon town." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="game.css" />
+  </head>
+  <body>
+    <div id="game-root">
+      <canvas id="game-canvas" width="960" height="600"></canvas>
+
+      <!-- Scanline / vignette / CRT overlay -->
+      <div class="crt-overlay"></div>
+      <div class="vignette"></div>
+
+      <!-- Boot / Title screen -->
+      <section id="screen-title" class="screen">
+        <div class="title-wrap">
+          <h1 class="game-title">
+            <span class="title-v">V</span><span class="title-rest">ORIZON</span>
+          </h1>
+          <p class="game-subtitle">— RETRO TOWN RACER —</p>
+        </div>
+
+        <div class="menu-panel">
+          <div class="menu-row menu-hint">
+            <span>SELECT DIFFICULTY</span>
+          </div>
+          <div class="difficulty-row" id="difficulty-row">
+            <button class="diff-btn" data-diff="easy">CRUISE</button>
+            <button class="diff-btn active" data-diff="normal">NORMAL</button>
+            <button class="diff-btn" data-diff="hard">RUSH HOUR</button>
+          </div>
+          <button id="btn-start" class="btn-primary">PRESS START</button>
+          <div class="menu-row menu-secondary">
+            <button id="btn-howto" class="btn-ghost">HOW TO PLAY</button>
+            <button id="btn-sound" class="btn-ghost">SOUND: ON</button>
+          </div>
+        </div>
+
+        <div class="hiscore-strip">
+          <span>BEST TIME</span>
+          <span id="hiscore-value">--:--.--</span>
+        </div>
+
+        <p class="footer-credit">A NEON DRIVE THROUGH DOWNTOWN &middot; USE ARROWS / WASD</p>
+      </section>
+
+      <!-- How to play overlay -->
+      <section id="screen-howto" class="screen hidden">
+        <div class="howto-panel">
+          <h2>HOW TO PLAY</h2>
+          <ul class="howto-list">
+            <li><b>&uarr; / W</b> — Accelerate</li>
+            <li><b>&darr; / S</b> — Brake / Reverse</li>
+            <li><b>&larr; &rarr; / A D</b> — Steer</li>
+            <li><b>SPACE</b> — Handbrake Drift</li>
+            <li><b>P / ESC</b> — Pause</li>
+          </ul>
+          <p class="howto-desc">
+            Race through the streets of Vorizon, weave past traffic, blast through checkpoints
+            before time runs out, and chain near-misses for bonus score. Hit too much traffic
+            and your run is over!
+          </p>
+          <button id="btn-howto-close" class="btn-primary small">GOT IT</button>
+        </div>
+      </section>
+
+      <!-- Countdown overlay -->
+      <section id="screen-countdown" class="screen hidden">
+        <div id="countdown-number">3</div>
+      </section>
+
+      <!-- HUD (during gameplay) -->
+      <section id="hud" class="hud hidden">
+        <div class="hud-top">
+          <div class="hud-chip">
+            <span class="hud-label">TIME</span>
+            <span class="hud-value" id="hud-time">60.0</span>
+          </div>
+          <div class="hud-chip hud-chip-center">
+            <span class="hud-label">SCORE</span>
+            <span class="hud-value" id="hud-score">0</span>
+          </div>
+          <div class="hud-chip">
+            <span class="hud-label">CHECKPOINT</span>
+            <span class="hud-value" id="hud-checkpoint">0 / 0</span>
+          </div>
+        </div>
+        <div class="hud-bottom">
+          <div class="speed-cluster">
+            <div class="speed-dial">
+              <div class="speed-needle" id="speed-needle"></div>
+              <div class="speed-center"></div>
+            </div>
+            <span class="speed-label"><span id="speed-value">0</span> MPH</span>
+          </div>
+          <div class="combo-cluster" id="combo-cluster">
+            <span id="combo-text">NEAR MISS x0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pause overlay -->
+      <section id="screen-pause" class="screen hidden">
+        <div class="menu-panel">
+          <h2 class="pause-title">PAUSED</h2>
+          <button id="btn-resume" class="btn-primary">RESUME</button>
+          <button id="btn-restart" class="btn-ghost">RESTART</button>
+          <button id="btn-quit" class="btn-ghost">QUIT TO TITLE</button>
+        </div>
+      </section>
+
+      <!-- Results screen -->
+      <section id="screen-results" class="screen hidden">
+        <div class="menu-panel results-panel">
+          <h2 id="results-title" class="results-title">FINISH!</h2>
+          <div class="results-grid">
+            <div class="results-row"><span>FINAL SCORE</span><span id="results-score">0</span></div>
+            <div class="results-row"><span>TIME LEFT</span><span id="results-time">0.0</span></div>
+            <div class="results-row"><span>CHECKPOINTS</span><span id="results-checkpoints">0 / 0</span></div>
+            <div class="results-row"><span>BEST COMBO</span><span id="results-combo">x0</span></div>
+            <div class="results-row highlight"><span>RANK</span><span id="results-rank">C</span></div>
+          </div>
+          <button id="btn-again" class="btn-primary">RACE AGAIN</button>
+          <button id="btn-title" class="btn-ghost">TITLE SCREEN</button>
+        </div>
+      </section>
+
+      <!-- Mobile touch controls -->
+      <div id="touch-controls" class="touch-controls hidden">
+        <div class="touch-left">
+          <button id="touch-left-btn" class="touch-btn">&larr;</button>
+          <button id="touch-right-btn" class="touch-btn">&rarr;</button>
+        </div>
+        <div class="touch-right">
+          <button id="touch-brake-btn" class="touch-btn touch-btn-round">&darr;</button>
+          <button id="touch-drift-btn" class="touch-btn touch-btn-round">&#9673;</button>
+          <button id="touch-gas-btn" class="touch-btn touch-btn-round touch-btn-gas">&uarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="game.js" defer></script>
+  </body>
+</html>
